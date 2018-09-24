@@ -1,0 +1,293 @@
+# -*- coding: utf-8 -*-
+
+"""
+
+Created on Tue Jun 05 10:12:55 2018 
+
+import pandas as pd
+
+import numpy as np
+
+ 
+
+#from __future__ import print_function
+
+ 
+
+def isUnique(master, slave):
+
+    flag = 0
+
+ 
+
+    for r in range(len(master)):
+
+        if master[r] == slave :
+
+            flag = 1
+
+    if flag == 0 :
+
+        return 1
+
+    else :
+
+        return 0
+
+   
+
+ 
+
+def isPresent(master,slave) :
+
+    flag1 = 0
+
+   
+
+    for i in range(len(master)):
+
+       
+
+        for j in range(len(master[i])):
+
+            if slave[0] == master[i][j] or slave[1] == master[i][j] :
+
+                flag1 == 1
+
+                return i
+
+               
+
+    if flag1 == 0 : return -1
+
+   
+
+def dropp(csk):
+
+    c = set(csk)
+
+    d = list(c)
+
+    d.sort()
+
+    return d
+
+ 
+
+ 
+
+def levenshtein(seq1, seq2):
+
+ 
+
+    size_x = len(seq1) + 1
+
+ 
+
+    size_y = len(seq2) + 1
+
+ 
+
+    matrix = np.zeros ((size_x, size_y))
+
+ 
+
+    for x in xrange(size_x):
+
+ 
+
+        matrix [x, 0] = x
+
+ 
+
+    for y in xrange(size_y):
+
+ 
+
+        matrix [0, y] = y
+
+ 
+
+ 
+
+    for x in xrange(1, size_x):
+
+ 
+
+        for y in xrange(1, size_y):
+
+ 
+
+            if seq1[x-1] == seq2[y-1]:
+
+ 
+
+                matrix [x,y] = min(
+
+ 
+
+                    matrix[x-1, y] + 1,
+
+ 
+
+                    matrix[x-1, y-1],
+
+ 
+
+                    matrix[x, y-1] + 1
+
+ 
+
+                )
+
+ 
+
+            else:
+
+ 
+
+                matrix [x,y] = min(
+
+ 
+
+                    matrix[x-1,y] + 1,
+
+ 
+
+                    matrix[x-1,y-1] + 1,
+
+ 
+
+                    matrix[x,y-1] + 1
+
+ 
+
+                )
+
+ 
+
+    return ((len(seq1) - (matrix[size_x - 1, size_y - 1]))*100/len(seq1))
+
+ 
+
+ 
+
+mstar_ebom = pd.read_excel('Excel File 1.xlsx', skiprows=2, encoding = 'latin-1')
+
+dhruv_ebom = pd.read_excel('File 2.xlsx', skiprows=2, encoding = 'latin-1')
+
+ 
+
+D_level_names_aggregate = []
+
+M_level_names_aggregate = []
+
+ 
+
+result = []
+
+ 
+
+D_level_names = [None, None]
+
+M_level_names = [None, None]
+
+ 
+
+for i, ser in mstar_ebom.iterrows():
+
+ 
+
+    M_level_names[0] = ser['Item Name']
+
+    M_level_names[1] = ser['Item ID']
+
+ 
+
+    if isUnique(M_level_names_aggregate,M_level_names) == 1:
+
+        M_level_names_aggregate.append(list(M_level_names))
+
+       
+
+print "Mstar Aggregated!"
+
+       
+
+for i, ser in dhruv_ebom.iterrows():
+
+ 
+
+    D_level_names[0] = ser['Item Name']
+
+    D_level_names[1] = ser['Item ID']
+
+ 
+
+    if isUnique(D_level_names_aggregate,D_level_names) == 1:
+
+        D_level_names_aggregate.append(list(D_level_names))
+
+       
+
+print "Dhruv Aggregated!"
+
+       
+
+#MAIN CHECK
+
+count4=0
+
+ 
+
+for i in range(len(D_level_names_aggregate)):
+
+ 
+
+        for j in range(len(M_level_names_aggregate)):              
+
+ 
+
+                if levenshtein((D_level_names_aggregate[i][0]), (M_level_names_aggregate[j][0])) > 75:
+
+ 
+
+                    count4 += 1
+
+                    result.append([i,j])
+
+                   
+
+print "Main Check Done!"
+
+ 
+
+with open('masterres75.txt','w+') as f1:
+
+   
+
+    for i in range(len(result)):   
+
+        f1.write(str(result[i][0])+"\t"+str(result[i][1])+"\n")
+
+ 
+
+f1.close()
+
+ 
+
+print "Result recorded!"
+
+ 
+
+with open('MasterFinal75.txt','w+') as f:
+
+   
+
+    for k in range(len(result)):
+
+        f.write("Group "+str(k+1)+") \nDhruv Level 4 Name = "+str(D_level_names_aggregate[result[k][0]][0])+ " \nID = "+str(D_level_names_aggregate[result[k][0]][1])+ "\nMstar Level 4 Name = "+str(M_level_names_aggregate[result[k][1]][0])+ " \nID = "+str(M_level_names_aggregate[result[k][1]][1]+"\n\n"))
+
+ 
+
+f.close()
